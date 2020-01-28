@@ -1,0 +1,7 @@
+name: BeeNames
+main: me.hashashin.BeeNames.BeeNames
+version: 0.1
+author: hashashin
+api-version: 1.15
+description: >
+            Plugin to name Bees as soon as they spawn based on a dictionary

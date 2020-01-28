@@ -1,0 +1,9 @@
+.project
+.settings
+dst
+lib
+bin
+target
+BeeNames.iml
+.idea
+.DS_Store
