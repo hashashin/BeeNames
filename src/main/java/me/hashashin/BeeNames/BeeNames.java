@@ -18,6 +18,8 @@ BeeNames, simple bukkit plugin to auto name bees that live in a bee hive.
 package me.hashashin.BeeNames;
 
 import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Bee;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
@@ -31,7 +33,7 @@ import java.util.List;
 import java.util.Random;
 
 
-public class BeeNames extends JavaPlugin implements Listener {
+public class BeeNames extends JavaPlugin implements Listener  {
 
 	@Override
 	public void onEnable() {
@@ -42,6 +44,8 @@ public class BeeNames extends JavaPlugin implements Listener {
 			this.saveDefaultConfig();
 			this.reloadConfig();
 		}
+		// Register command
+		this.getCommand("reload").setExecutor(this);
 		// Register events
 		this.getServer().getPluginManager().registerEvents(this, this);
 		// Log loading
@@ -56,12 +60,19 @@ public class BeeNames extends JavaPlugin implements Listener {
 				" v" + this.getDescription().getVersion());
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST)
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
+		this.reloadConfig();
+		this.getLogger().info("Config reloaded " + getConfig().getStringList("names").size()
+				+ " names in the list. "+ this.getDescription().getName() +
+				" v" + this.getDescription().getVersion());
+
+		return true;
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
-		if(event.isCancelled()) {
-			return;
-		}
-		// Check if Creature is a BEE
+		// Check if Creature is BEE
 		if(event.getEntityType() == EntityType.BEE) {
 			if (this.getConfig().getBoolean("debug")) {
 				this.getLogger().info(event.getSpawnReason().name());
@@ -78,15 +89,15 @@ public class BeeNames extends JavaPlugin implements Listener {
 				// Check if the Bee lives in the wild
 				if (((Bee) event.getEntity()).getHive() == null) {
 					return;
-				} else //noinspection ConstantConditions
-					if (((Bee) event.getEntity()).getHive().getBlock().getBlockData().getMaterial()
+				} else
+					if (((Bee) event.getEntity()).getHive().getBlock().getType()
 						== Material.BEE_NEST) {
 					if (this.getConfig().getBoolean("debug")) {
 						this.getLogger().info("This bee belongs to a nest.");
 					}
 					return;
 				}
-				// Load the BEE names out of config.yml into a List
+				// Load the bee names out of config.yml into a List
 				List<?> names = this.getConfig().getList("names");
 				// Pick a random name from that list
 				String random_name = null;
@@ -95,11 +106,11 @@ public class BeeNames extends JavaPlugin implements Listener {
 					random_name = names.get(rand.nextInt(names.size())).toString();
 				}
 
-				// Set the custom name of the Bee
+				// Set the custom name of the bee
 				event.getEntity().setCustomName(random_name);
 				event.getEntity().setCustomNameVisible(true);
 				
-				// Check if log mode is enabled
+				// Check if debug mode is enabled
 				if (this.getConfig().getBoolean("debug")) {
 					// Log the actions
 					this.getLogger().info("Bee '"+ random_name +"' spawned at location: '"
