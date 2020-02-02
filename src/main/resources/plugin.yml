@@ -1,15 +1,22 @@
 name: BeeNames
 main: me.hashashin.BeeNames.BeeNames
-version: 0.1
+version: 0.2
 author: hashashin
 api-version: 1.15
 description: >
             Plugin to name Bees as soon as they spawn based on a dictionary
 commands:
-  reload:
+  bn-reload:
     description: Reload the config file
     aliases: [beereload,beenamesreload]
     permission: beenames.reload
+    permission-message: You've no permission to use this command!
+    usage: /<command>
+    default: op
+  bn-debug:
+    description: Toggle debug mode
+    aliases: [beedebug,beenamesdebug]
+    permission: beenames.debug
     permission-message: You've no permission to use this command!
     usage: /<command>
     default: op

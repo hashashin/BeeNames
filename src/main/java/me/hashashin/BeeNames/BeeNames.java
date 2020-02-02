@@ -18,8 +18,6 @@ BeeNames, simple bukkit plugin to auto name bees that live in a bee hive.
 package me.hashashin.BeeNames;
 
 import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Bee;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
@@ -35,17 +33,25 @@ import java.util.Random;
 
 public class BeeNames extends JavaPlugin implements Listener  {
 
+	private static BeeNames instance;
+
+	public static BeeNames getInstance() {
+		return instance;
+	}
+
 	@Override
 	public void onEnable() {
 		// Define the config.yml
+		instance = this;
 		final File check = new File(this.getDataFolder(), "config.yml");
 		// Check for existing config.yml, if not create it
 		if (!check.exists()) {
 			this.saveDefaultConfig();
 			this.reloadConfig();
 		}
-		// Register command
-		this.getCommand("reload").setExecutor(this);
+		// Register commands
+		this.getCommand("bn-reload").setExecutor(new ReloadCommand());
+		this.getCommand("bn-debug").setExecutor(new DebugCommand());
 		// Register events
 		this.getServer().getPluginManager().registerEvents(this, this);
 		// Log loading
@@ -58,16 +64,6 @@ public class BeeNames extends JavaPlugin implements Listener  {
 		// Log disabling
 		this.getLogger().info("Disabled " + this.getDescription().getName() +
 				" v" + this.getDescription().getVersion());
-	}
-
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-		this.reloadConfig();
-		this.getLogger().info("Config reloaded " + getConfig().getStringList("names").size()
-				+ " names in the list. "+ this.getDescription().getName() +
-				" v" + this.getDescription().getVersion());
-
-		return true;
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -85,7 +81,7 @@ public class BeeNames extends JavaPlugin implements Listener  {
 				return;
 			}
 			// Check if event is instance of Bee
-			if(event.getEntity() instanceof org.bukkit.entity.Bee) {
+			if(event.getEntity() instanceof Bee) {
 				// Check if the Bee lives in the wild
 				if (((Bee) event.getEntity()).getHive() == null) {
 					return;
